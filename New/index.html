@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Manhaj Public School</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: #f9f9f9;
+    }
+    #canvas {
+      margin-top: 20px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+    }
+    .upload-section {
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Manhaj Public School</h1>
+  <p>Upload your passport size photo and get your framed welcome image!</p>
+
+  <div class="upload-section">
+    <input type="file" id="upload" accept="image/*" />
+    <br />
+    <button onclick="downloadFramedImage()">Download Framed Photo</button>
+  </div>
+
+  <canvas id="canvas" width="800" height="800"></canvas>
+
+  <script>
+    const upload = document.getElementById('upload');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const frameImg = new Image();
+    frameImg.src = 'A_“welcome_poster"_for_Manhaj_Public_School_for_th.png'; // Place this image in same folder
+
+    upload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const userImg = new Image();
+        userImg.onload = function() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Draw user photo in circular crop (centered)
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2 - 50;
+          const radius = 240;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(userImg, centerX - radius, centerY - radius, radius * 2, radius * 2);
+          ctx.restore();
+
+          // Draw welcome frame on top
+          frameImg.onload = function() {
+            ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+          }
+          ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+        };
+        userImg.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function downloadFramedImage() {
+      const link = document.createElement('a');
+      link.download = 'manhaj_welcome_photo.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  </script>
+</body>
+</html>
